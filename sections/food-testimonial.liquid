@@ -1,0 +1,275 @@
+{{ 'food-testimonial.css' | asset_url | stylesheet_tag }}
+{{ 'food-testimonial-card.css' | asset_url | stylesheet_tag }}
+<script src='{{ 'food-testimonial.js' | asset_url }}' defer></script>
+
+{% liquid
+  assign id = section.id
+  assign padding_bottom = section.settings.padding_bottom
+  assign padding_top = section.settings.padding_top
+  assign wrapper = 'testimonial-custom-section__outer-wrapper-' | append: id
+%}
+
+<style>
+  @media screen and (min-width: 749px) {
+    .{{wrapper}} {
+      padding-top: {{ padding_top }}px;
+      padding-bottom: {{ padding_bottom }}px;
+    }
+  }
+
+  .{{wrapper}} {
+      padding-top: {{ padding_top | times: 0.75 }}px;
+      padding-bottom: {{ padding_bottom | times: 1.5 }}px;
+  }
+
+  .testimonial-custom-section {
+    --testimonial-active-color: {{ section.settings.testimonial_active_color }};
+    --testimonial-border-color: {{ section.settings.testimonial_border_color }};
+    --pagination-active-color: var(--testimonial-border-color);
+    background-color: {{ section.settings.section_bg }};
+  }
+
+  .testimonial-card.active {
+    background-color: var(--testimonial-active-color);
+    border: 1px solid var(--testimonial-border-color);
+  }
+
+  .testimonial-card {
+    border: 1px solid var(--testimonial-border-color);
+  }
+
+  .splide__pagination__page.is-active {
+    background-color: var(--pagination-active-color);
+  }
+</style>
+
+{% capture splide_options %}
+{
+  "type": "{{ section.settings.slide_type }}",
+  "perPage": {{ section.settings.slide_per_page }},
+  "pagination": {{section.settings.pagination}},
+  "arrows": {{section.settings.arrows}},
+  "autoplay": {{section.settings.autoplay}},
+  "interval": {{section.settings.autoplay_interval | times: 1000 }},
+  "width": "36rem",
+  "padding": {"right": "45%"},
+  "gap": "3rem",
+  "breakpoints": {
+    "1120": {
+      "padding": {"right": "32%"}
+    },
+    "749": {
+      "padding": {"right": "0%"}
+    }
+  }
+}
+{% endcapture %}
+
+<div class='testimonial-custom-section {{wrapper}}'>
+  <div class='testimonial-custom-section__inner-wrapper '>
+    <div class='testimonial-custom-section__image-container '>
+      {% for testimonial in section.blocks %}
+        <div class='testimonial-custom-section__image-wrapper
+          {% if forloop.first %}
+            full-opacity
+          {% else %}
+            zero-opacity
+          {% endif %}'>
+          {% render 'responsive-picture', desktopImage: testimonial.settings.product_image %}
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class='testimonial-custom-section__header'>
+      <div class='testimonial-custom-section__header-container flex flex-col gap-3'>
+        <h2>{{ section.settings.heading }}</h2>
+        {{ section.settings.description }}
+      </div>
+
+      <div class='testimonial-custom-section__slider-wrapper'>
+        <custom-slider
+          data-options='{{ splide_options }}'
+          class='splide'>
+          <div class='splide__track'>
+            <ul class='splide__list'>
+              {% for testimonial in section.blocks %}
+                <li class='splide__slide'>
+                  {% render 'testimonial-card', testimonial: testimonial %}
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </custom-slider>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Testimonial section",
+  "class": "testimonial-custom-section",
+  "tag": "section",
+  "settings": [
+    {
+      "type": "color",
+      "id": "section_bg",
+      "label": "Section Background Color",
+      "default": "#FFFFF5"
+    },
+    {
+      "type": "color",
+      "id": "testimonial_active_color",
+      "label": "Testimonial Active Card Color",
+      "default": "#F6FFC2"
+    },
+    {
+      "type": "color",
+      "id": "testimonial_border_color",
+      "label": "Testimonial Border Color",
+      "default": "#5C6E4A"
+    },
+    {
+      "type": "color",
+      "id": "pagination_active_color",
+      "label": "Pagination Active Color",
+      "default": "#5C6E4A"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading"
+    },
+    {
+      "type": "richtext",
+      "id": "description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Slider settings"
+    },
+    {
+      "type": "select",
+      "id": "slide_type",
+      "label": "Slider type",
+      "options": [
+        {
+          "value": "loop",
+          "label": "Loop"
+        },
+        {
+          "value": "fade",
+          "label": "Fade"
+        },
+        {
+          "value": "slide",
+          "label": "Slide"
+        }
+      ]
+    },
+    {
+      "type": "range",
+      "id": "slide_per_page",
+      "min": 1,
+      "max": 10,
+      "step": 1,
+      "label": "Slide per page",
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "pagination",
+      "label": "Show pagination",
+      "default": false,
+      "info": "Enables dots at bottom of slider"
+    },
+    {
+      "type": "checkbox",
+      "id": "arrows",
+      "label": "Enable arrows",
+      "default": true,
+      "info": "Enables arrows button for navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Enable Auto play",
+      "default": false,
+      "info": "Auto play the slides"
+    },
+    {
+      "type": "range",
+      "id": "autoplay_interval",
+      "label": "Auto play duration",
+      "min": 1,
+      "max": 10,
+      "default": 3,
+      "step": 0.5,
+      "unit": "sec"
+    },
+    {
+      "type": "header",
+      "content": "Padding settings"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "unit": "px",
+      "label": "Top Padding",
+      "default": 10,
+      "step": 1
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "step": 1,
+      "min": 0,
+      "max": 100,
+      "unit": "px",
+      "label": "Bottom Padding",
+      "default": 10
+    }
+  ],
+  "blocks": [
+    {
+      "type": "testimonial",
+      "name": "Testimonial",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "product_image",
+          "label": "Main Image"
+        },
+        {
+          "type": "header",
+          "content": "Author details"
+        },
+        {
+          "type": "text",
+          "id": "author",
+          "label": "Name"
+        },
+        {
+          "type": "richtext",
+          "id": "author_review",
+          "label": "Review"
+        },
+        {
+          "type": "text",
+          "id": "author_designation",
+          "label": "Designation"
+        },
+        {
+          "type": "image_picker",
+          "id": "author_image",
+          "label": "Image"
+        }
+      ]
+    }
+  ],
+  "presets": [{ "name": "food Testimonial section" }]
+}
+{% endschema %}
